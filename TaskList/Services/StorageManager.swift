@@ -7,11 +7,15 @@
 
 import CoreData
 
+enum CoreDataError: Error {
+    case wrongEntityType
+}
+
 final class StorageManager {
     static let shared = StorageManager()
     
     // MARK: - Core Data stack
-    lazy var persistentContainer: NSPersistentContainer = {
+    private let persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "TaskList")
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
@@ -27,17 +31,16 @@ final class StorageManager {
     
     private init() { }
     
-    //MARK: - CRUD methods
-    func fetchData() -> [Task] {
+    //MARK: - CRUD methods    
+    func fetchData(completion: @escaping (Result<[Task], CoreDataError>) -> Void) {
         let fetchRequest = Task.fetchRequest()
         
         do {
-            return try persistentContainer.viewContext.fetch(fetchRequest)
+            let tasks = try context.fetch(fetchRequest)
+            completion(.success(tasks))
         } catch {
-            print(error)
+            completion(.failure(.wrongEntityType))
         }
-        
-        return []
     }
     
     func saveTask(_ taskName: String) -> Task {

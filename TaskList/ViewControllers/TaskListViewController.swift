@@ -10,7 +10,6 @@ import UIKit
 final class TaskListViewController: UITableViewController {
     
     private let cellID = "task"
-    private let alertMessage = "What do you want to do?"
     private var taskList: [Task] = []
     
     private let storageManager = StorageManager.shared
@@ -20,11 +19,18 @@ final class TaskListViewController: UITableViewController {
         view.backgroundColor = .white
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellID)
         setupNavigationBar()
-        taskList = storageManager.fetchData()
+        storageManager.fetchData(completion: {[unowned self] result in
+            switch result {
+            case .success(let tasks):
+                taskList = tasks
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        })
     }
     
     private func addNewTask() {
-        showAlert(withTitle: "New Task", andMessage: alertMessage)
+        showAlert(withTitle: "New Task", andMessage: "What do you want to do?")
     }
     
     private func showAlert(withTitle title: String, andMessage message: String, task: Task? = nil) {
@@ -108,17 +114,13 @@ extension TaskListViewController {
         return cell
     }
     
-    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
         showAlert(
             withTitle: "Update task",
-            andMessage: alertMessage,
+            andMessage: "What do you want to do?",
             task: taskList[indexPath.row]
         )
-        return tableView.indexPathForSelectedRow
-    }
-    
-    override func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
