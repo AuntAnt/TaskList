@@ -1,7 +1,7 @@
 # TaskList
 
 ## Info
-Simple doto app. Avaliable operations for task: add, edit and delete 
+Simple todo app. Avaliable operations for task: add, edit and delete 
 
 ## Stack
  - UIKit
